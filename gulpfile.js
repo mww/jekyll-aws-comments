@@ -29,15 +29,15 @@ gulp.task('node-modules', () =>
       .pipe(install({production: true}))
 );
 
-gulp.task('zip', ['js', 'node-modules'], () =>
+gulp.task('zip', gulp.series('js', 'node-modules', () =>
   gulp.src(['dist/**/*', '!dist/package.json'])
       .pipe(zip('dist.zip'))
       .pipe(gulp.dest('./'))
-);
+));
 
-gulp.task('deploy', ['zip'], () =>
+gulp.task('deploy', gulp.series('zip', () =>
   gulp.src('dist.zip')
       .pipe(lambda(lambdaParams, awsOpts))
-);
+));
 
-gulp.task('default', ['zip']);
+gulp.task('default', gulp.series('zip'));
