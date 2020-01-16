@@ -30,7 +30,7 @@ Comments.prototype.submit = function(event) {
   .then(() => // Commit comment file
     repo.contents('_comments/' + commentId + '.md').add({
       message: 'Add comment',
-      content: new Buffer(content, 'utf8').toString('base64'),
+      content: Buffer.from(content, 'utf8').toString('base64'),
       branch: branch
     }))
   .then(() => // Create pull request
