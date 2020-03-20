@@ -20,7 +20,10 @@ Comments.prototype.submit = function(event) {
   const content = pack(event.pageId, date, name, homepage, email, event.comment.trim());
   const commentId = date.format('YYYYMMDDTHHmmss');
   const branch = 'comment-' + commentId;
-  
+
+  let filename = event.pageId + '-' + commentId + '.yml';
+  filename = filename.replace(/\//g, '_');
+
   return repo.git.refs.heads(base).fetch()
   .then(ref => // Crete new comment branch
     repo.git.refs.create({
@@ -28,7 +31,7 @@ Comments.prototype.submit = function(event) {
       sha: ref.object.sha
     }))
   .then(() => // Commit comment file
-    repo.contents('_comments/' + commentId + '.md').add({
+    repo.contents('_data/comments/' + filename).add({
       message: 'Add comment',
       content: Buffer.from(content, 'utf8').toString('base64'),
       branch: branch
@@ -44,14 +47,17 @@ Comments.prototype.submit = function(event) {
 };
 
 function pack(pageId, date, name, homepage, email, comment) {
-  return '---\n' +
-    'page_id: ' + pageId + '\n' +
+  let msg = 'page_id: ' + pageId + '\n' +
     'date: ' +  date.toISOString() + '\n' +
     'name: ' + name + '\n' +
     'homepage: ' + homepage + '\n' +
     'mail_hash: ' + md5(email) + '\n' +
-    '---\n\n' +
-    comment + '\n';
+    'msg: |\n';
+  lines = comment.split('\n');
+  for (i = 0; i < lines.length; i++) {
+    msg += '  ' + lines[i] + '\n';
+  }
+  return msg;
 }
 
 function parseUrl(url) {
