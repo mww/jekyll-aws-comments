@@ -4,11 +4,13 @@
   "description": "Static comments for Jekyll with AWS Lambda and GitHub",
   "main": "comments.js",
   "scripts": {
-    "test": "node test.js"
+    "clean": "rm -fr node_modules && rm -f jekyll-aws-comments.zip",
+    "test": "node test.js",
+    "build-aws-lambda": "repack-zip"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ummels/jekyll-aws-comments.git"
+    "url": "https://github.com/mww/jekyll-aws-comments.git"
   },
   "keywords": [
     "jekyll",
@@ -19,7 +21,7 @@
   "author": "Michael Ummels <michael@ummels.de>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ummels/jekyll-aws-comments/issues"
+    "url": "https://github.com/mww/jekyll-aws-comments/issues"
   },
   "homepage": "http://ummels.github.io/jekyll-aws-comments",
   "private": true,
@@ -29,13 +31,17 @@
     "octokat": "^0.10.0"
   },
   "devDependencies": {
-    "del": "^2.2.0",
-    "gulp": "^4.0.2",
-    "gulp-awslambda": "^0.5.0",
-    "gulp-install": "^1.1.0",
-    "gulp-zip": "^5.0.1"
+    "repack-zip": "^0.2.8"
   },
   "engines": {
     "node": ">= 12.1"
+  },
+  "repackZipConfig": {
+    "excludes": [
+      "README.md",
+      "example_config.json",
+      "test.js",
+      "test_event.json"
+    ]
   }
 }

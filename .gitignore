@@ -1,6 +1,5 @@
 config.json
-dist.zip
-dist
+jekyll-aws-comments.zip
 logs
 *.log
 node_modules
