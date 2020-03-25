@@ -2,8 +2,9 @@
   "owner": "USER_NAME",
   "repo": "REPO_NAME",
   "base": "master",
+  "sqs_region": "AWS_REGION",
+  "sqs_url": "SQS_URL",
   "credentials": {
-    "username": "USER_NAME",
-    "password": "PASSWORD"
+    "token": "GITHUB_TOKEN"
   }
 }

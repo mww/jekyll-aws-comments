@@ -5,8 +5,9 @@
   "main": "comments.js",
   "scripts": {
     "clean": "rm -fr node_modules && rm -f jekyll-aws-comments.zip",
-    "test": "node test.js",
-    "build-aws-lambda": "repack-zip"
+    "build-aws-lambda": "repack-zip",
+    "test": "mocha",
+    "test-config": "node test_config.js"
   },
   "repository": {
     "type": "git",
@@ -26,11 +27,15 @@
   "homepage": "http://ummels.github.io/jekyll-aws-comments",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.645.0",
     "js-md5": "^0.7.3",
     "moment": "^2.24.0",
     "octokat": "^0.10.0"
   },
   "devDependencies": {
+    "aws-sdk-mock": "^5.1.0",
+    "mocha": "^7.1.1",
+    "nock": "^12.0.3",
     "repack-zip": "^0.2.8"
   },
   "engines": {
@@ -40,8 +45,8 @@
     "excludes": [
       "README.md",
       "example_config.json",
-      "test.js",
-      "test_event.json"
+      "test/**",
+      "node_modules/aws-sdk/**"
     ]
   }
 }
