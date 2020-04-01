@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  jekyll-aws-comments
+
+  App to accept a user comment and create a GitHub pull request containing the
+  contents of the comment.
+
+Parameters:
+  CorsAllowOriginParameter:
+    Type: String
+    Default: "'*'"
+    Description: Enter the host that will call the PostCommentsFunction. e.g. "'https://www.example.com'"
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: index.handler
+  Api:
+    Cors:
+      AllowOrigin:
+        Ref: CorsAllowOriginParameter
+      AllowHeaders: "'Content-Type'"
+    EndpointConfiguration: REGIONAL
+
+Resources:
+  StaticCommentsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 300 # 5 minutes
+
+  PostCommentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: post-comments/
+      Role: !GetAtt PostCommentsFunctionRole.Arn
+      Environment:
+        Variables:
+          SQS_URL: !Ref StaticCommentsQueue
+      Events:
+        Comment:
+          Type: Api
+          Properties:
+            Path: /comment
+            Method: post
+
+  CreatePullRequestFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: create-pull-request/
+      Timeout: 10
+      Events:
+        PullRequest:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt StaticCommentsQueue.Arn
+            BatchSize: 10
+            Enabled: true
+
+  # Create a policy to allow the PostCommentsFunction to send messages to the
+  # StaticCommentsQueue
+  StaticCommentsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Id: PushCommentsWriteToSqsPolic
+        Statement:
+          Sid: allow-lambda-to-send-message-to-sqs
+          Effect: Allow
+          Principal: '*'
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+          Resource: !GetAtt StaticCommentsQueue.Arn
+          Condition:
+            ArnEquals:
+              aws:SourceArn: !GetAtt PostCommentsFunction.Arn
+      Queues:
+        - !Ref StaticCommentsQueue
+
+  # Create a custom role so that the PostCommentsFunction has access to SQS.
+  PostCommentsFunctionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: PostComments
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Resource: '*'
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - sqs:GetQueueAttributes
+                  - sqs:SendMessage
+
+Outputs:
+  CommentApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/comment/"

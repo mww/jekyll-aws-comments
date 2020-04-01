@@ -1,39 +1,15 @@
 var assert = require('assert');
-var AWS = require('aws-sdk-mock');
 var nock = require('nock');
-var testEvent = require('./test_event.json');
 var index = require('./../index.js');
 var config = require('./../config.json');
 
-describe('postCommentHandler', function() {
-  it('post message to SQS', async function() {
-    AWS.mock('SQS', 'sendMessage', function(msg, callback) {
-      let expected = JSON.stringify(testEvent);
-      assert.equal(msg.MessageBody, expected);
-      callback(null, { MessageId: 1 });
-    });
-
-    const res = await index.postCommentHandler(testEvent);
-    assert.equal(res, 'Success');
-
-    AWS.restore('SQS');
-  });
-
-  it('error posting message to SQS', async function() {
-    AWS.mock('SQS', 'sendMessage', function(msg, callback) {
-      let expected = JSON.stringify(testEvent);
-      assert.equal(msg.MessageBody, expected);
-      callback(Error('Something went wrong!'), null);
-    });
-
-    return index.postCommentHandler(testEvent)
-        .then(x => Promise.reject('should have failed'))
-        .catch(e => {
-          assert.equal(e.message, 'Something went wrong!');
-          return Promise.resolve('expected an error');
-        });
-  });
-});
+const comment = {
+  "name": "John Doe",
+  "email": "john@doe.com",
+  "url": "http://www.doe.com",
+  "pageId": "/test",
+  "comment": "Howdie, how are you doing?\nThis is a long comment. It even has code in it\n`int x = 10;`\n\nWhat more is needed?"
+}
 
 // Make sure that all the expected GitHub API calls are made.
 describe('sqsMessageHandler', function() {
@@ -94,24 +70,16 @@ describe('sqsMessageHandler', function() {
     let event = {
       Records: [
         {
-          body: JSON.stringify(testEvent),
+          body: JSON.stringify(comment),
           attributes: {
             SentTimestamp: '1585157880854'
           }
         }
       ]
     };
-    await index.sqsMessageHandler(event);
+    await index.handler(event);
 
     assert.equal(nock.isDone(), true);
     nock.restore();
   });
 });
-
-// index.handler(event, null, ((err, res) => {
-//   if (err === null) {
-//     console.log('==> ' + res);
-//   } else {
-//     console.error('==> ' + err);
-//   }
-// }));

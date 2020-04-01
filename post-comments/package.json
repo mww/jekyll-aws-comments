@@ -1,0 +1,22 @@
+{
+  "name": "hello_world",
+  "version": "1.0.0",
+  "description": "hello world sample for NodeJS",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mww/jekyll-aws-comments/post-comments"
+  },
+  "author": "Mark Weaver",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.650.0"
+  },
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "aws-sdk-mock": "^5.1.0"
+  }
+}

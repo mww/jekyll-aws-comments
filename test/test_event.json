@@ -1,7 +1,0 @@
-{
-  "name": "John Doe",
-  "email": "john@doe.com",
-  "url": "http://www.doe.com",
-  "pageId": "/test",
-  "comment": "Howdie, how are you doing?\nThis is a long comment. It even has code in it\n`int x = 10;`\n\nWhat more is needed?"
-}

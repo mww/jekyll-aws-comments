@@ -1,5 +1,5 @@
 config.json
-jekyll-aws-comments.zip
+samconfig.toml
 logs
 *.log
 node_modules
@@ -10,3 +10,4 @@ npm-debug.log*
 _site
 .sass-cache
 .jekyll-metadata
+.aws-sam/
