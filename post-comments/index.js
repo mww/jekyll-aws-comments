@@ -2,36 +2,30 @@ const AWS = require('aws-sdk');
 
 exports.handler = async (event) => {
   let region = process.env.AWS_REGION;
-  let sqsUrl = process.env.SQS_URL;
+  let topicArn = process.env.SNS_TOPIC_ARN;
 
   AWS.config.update({region: region});
-  const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
+  const sns = new AWS.SNS({apiVersion: '2010-03-31'});
 
-  var msg = {
-    DelaySeconds: 0,
-    MessageBody: event.body,
-    QueueUrl: sqsUrl
+  var params = {
+    Message: event.body,
+    TopicArn: topicArn
   };
 
-  return new Promise(function(resolve, reject) {
-    try {
-      sqs.sendMessage(msg, function(err, data) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({
-            'statusCode': 200,
-            'headers': {
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Headers': '*',
-              'Access-Control-Allow-Methods': '*'
-            },
-            'body': '{}'
-          });
-        }
+  return sns.publish(params).promise()
+      .then(resp => {
+        return {
+          'statusCode': 200,
+          'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Methods': '*'
+          },
+          'body': '{}'
+        };
+      })
+      .catch(err => {
+        console.log('error publishing message to SNS: ' + err.message);
+        throw err;
       });
-    } catch (e) {
-      reject(e);
-    }
-  });
 };

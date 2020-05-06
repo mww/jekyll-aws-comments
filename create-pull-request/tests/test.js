@@ -12,8 +12,8 @@ const comment = {
 }
 
 // Make sure that all the expected GitHub API calls are made.
-describe('sqsMessageHandler', function() {
-  it('handle SQS Message', async function() {
+describe('snsMessageHandler', function() {
+  it('handle SNS Message', async function() {
 
     let path = '/repos/' + config.owner + '/' + config.repo + '/git/refs/heads/master';
     nock('https://api.github.com')
@@ -29,23 +29,23 @@ describe('sqsMessageHandler', function() {
     path = '/repos/' + config.owner + '/' + config.repo + '/git/refs';
     nock('https://api.github.com')
         .post(path, {
-          'ref': 'refs/heads/comment-20200325T103800',
+          'ref': 'refs/heads/comment-20200506T155903',
           'sha':'712921541bf6bb1077a152c273a6a0b200a53689'
         })
         .reply(201, {
-          'ref':'refs/heads/comment-20200325T103800',
+          'ref':'refs/heads/comment-20200506T155903',
           'object':{
             'sha':'712921541bf6bb1077a152c273a6a0b200a53689',
             'type':'commit',
           }
         });
 
-    path = '/repos/' + config.owner + '/' + config.repo + '/contents/_data/comments/_test-20200325T103800.yml';
+    path = '/repos/' + config.owner + '/' + config.repo + '/contents/_data/comments/_test-20200506T155903.yml';
     nock('https://api.github.com')
         .put(path, {
           'message':'Add comment',
           'content':/\w+/,
-          'branch':'comment-20200325T103800'
+          'branch':'comment-20200506T155903'
         })
         .reply(201, {
           'commit':{
@@ -60,7 +60,7 @@ describe('sqsMessageHandler', function() {
         .post(path, {
           'title':'New comment from John Doe',
           'body':'John Doe commented on \'/test\'.',
-          'head':'comment-20200325T103800',
+          'head':'comment-20200506T155903',
           'base':'master'
         })
         .reply(201, {
@@ -70,9 +70,9 @@ describe('sqsMessageHandler', function() {
     let event = {
       Records: [
         {
-          body: JSON.stringify(comment),
-          attributes: {
-            SentTimestamp: '1585157880854'
+          Sns: {
+            Message: JSON.stringify(comment),
+            Timestamp: '2020-05-06T22:59:03.267Z'
           }
         }
       ]

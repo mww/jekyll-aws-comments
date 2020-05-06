@@ -1,7 +1,7 @@
 {
-  "name": "hello_world",
+  "name": "post_comments",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
+  "description": "Take a comment from a POST request and publish it on SNS.",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -9,14 +9,13 @@
   },
   "author": "Mark Weaver",
   "license": "ISC",
-  "dependencies": {
-    "aws-sdk": "^2.650.0"
-  },
+  "dependencies": {},
   "scripts": {
     "test": "mocha tests"
   },
   "devDependencies": {
     "mocha": "^6.1.4",
+    "aws-sdk": "^2.650.0",
     "aws-sdk-mock": "^5.1.0"
   }
 }

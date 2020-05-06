@@ -24,19 +24,19 @@ Globals:
     EndpointConfiguration: REGIONAL
 
 Resources:
-  StaticCommentsQueue:
-    Type: AWS::SQS::Queue
+  StaticCommentsTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      MessageRetentionPeriod: 300 # 5 minutes
+      TopicName: StaticCommentsTopic
 
   PostCommentsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: post-comments/
-      Role: !GetAtt PostCommentsFunctionRole.Arn
+      Role: !GetAtt StaticCommentsRole.Arn
       Environment:
         Variables:
-          SQS_URL: !Ref StaticCommentsQueue
+          SNS_TOPIC_ARN: !Ref StaticCommentsTopic
       Events:
         Comment:
           Type: Api
@@ -48,39 +48,16 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: create-pull-request/
+      Role: !GetAtt StaticCommentsRole.Arn
       Timeout: 10
       Events:
         PullRequest:
-          Type: SQS
+          Type: SNS
           Properties:
-            Queue: !GetAtt StaticCommentsQueue.Arn
-            BatchSize: 10
-            Enabled: true
-
-  # Create a policy to allow the PostCommentsFunction to send messages to the
-  # StaticCommentsQueue
-  StaticCommentsQueuePolicy:
-    Type: AWS::SQS::QueuePolicy
-    Properties:
-      PolicyDocument:
-        Id: PushCommentsWriteToSqsPolic
-        Statement:
-          Sid: allow-lambda-to-send-message-to-sqs
-          Effect: Allow
-          Principal: '*'
-          Action:
-            - sqs:SendMessage
-            - sqs:ReceiveMessage
-            - sqs:DeleteMessage
-          Resource: !GetAtt StaticCommentsQueue.Arn
-          Condition:
-            ArnEquals:
-              aws:SourceArn: !GetAtt PostCommentsFunction.Arn
-      Queues:
-        - !Ref StaticCommentsQueue
+            Topic: !Ref StaticCommentsTopic
 
   # Create a custom role so that the PostCommentsFunction has access to SQS.
-  PostCommentsFunctionRole:
+  StaticCommentsRole:
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:
@@ -92,7 +69,7 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       Policies:
-        - PolicyName: PostComments
+        - PolicyName: StaticCommentsPolicy
           PolicyDocument:
             Statement:
               - Effect: Allow
@@ -101,8 +78,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - sqs:GetQueueAttributes
-                  - sqs:SendMessage
+                  - sns:*
 
 Outputs:
   CommentApi:
