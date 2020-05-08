@@ -26,8 +26,6 @@ Globals:
 Resources:
   StaticCommentsTopic:
     Type: AWS::SNS::Topic
-    Properties:
-      TopicName: StaticCommentsTopic
 
   PostCommentsFunction:
     Type: AWS::Serverless::Function
@@ -56,9 +54,9 @@ Resources:
           Properties:
             Topic: !Ref StaticCommentsTopic
 
-  # Create a custom role so that the PostCommentsFunction has access to SQS.
+  # Create a custom role that both functions can use.
   StaticCommentsRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
