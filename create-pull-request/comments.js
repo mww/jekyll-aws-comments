@@ -15,7 +15,7 @@ Comments.prototype.submit = function(event, date) {
   const email = event.email.trim().toLowerCase();
   const homepage = parseUrl(event.url);
   const name = event.name.trim();
-  const content = pack(event.pageId, date, name, homepage, email, event.comment.trim());
+  const content = pack(event.pageId, date, name, homepage, email, event.msg.trim());
   const commentId = date.format('YYYYMMDDTHHmmss');
   const branch = 'comment-' + commentId;
 
